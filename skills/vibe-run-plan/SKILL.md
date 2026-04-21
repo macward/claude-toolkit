@@ -186,6 +186,34 @@ Auto-skipping.
 
 Record as skipped with reason. Do not ask — if the dependency was skipped, the dependent cannot run.
 
+#### 6f. Post-task: Clear context
+
+After each completed (or skipped) task — before starting the next one — clear the conversation context to prevent context bloat across long runs:
+
+1. **Note current progress** — hold a brief internal summary in mind before clearing:
+   - Tasks completed so far (with PR numbers if available)
+   - Tasks skipped (with reasons)
+   - Remaining queue (ordered, with unresolved dependencies)
+   - Current mode (autonomous / confirm)
+
+2. **Issue `/clear`** — reset the conversation context:
+   ```
+   /clear
+   ```
+
+3. **Reload context from vibeMCP** — re-establish working state after the clear:
+   ```
+   get_plan(project, [filename])
+   list_tasks(project, status="pending", [feature])
+   list_tasks(project, status="in-progress", [feature])
+   ```
+
+4. **Rebuild remaining queue** — reconstruct from current task statuses in vibeMCP. Already-done tasks will appear as `done`, so the queue rebuilds correctly from live state without needing to remember what was completed.
+
+5. **Resume** — continue with the next task in the queue (step 6a or 6b depending on mode).
+
+> **Why this matters:** Each `solve-task` invocation adds substantial context (code diffs, PR output, review logs). Without clearing, a run of 5+ tasks risks filling the context window and degrading quality on later tasks. Clearing and reloading from vibeMCP keeps each task delegation starting from a clean, focused state.
+
 ### 7. Handle Failures
 
 **Autonomous mode**: stop the entire run immediately.
@@ -252,6 +280,7 @@ tool_create_plan(
 
 - **Delegate to solve-task** — run-plan never implements, reviews, or delivers. It orchestrates.
 - **Clean state between tasks** — verify and enforce clean git state before each task, clean up failed branches on retry
+- **Clear context between tasks** — issue `/clear` after each task and reload from vibeMCP to prevent context bloat across long runs
 - **Re-check dependencies** — completing or skipping a task changes what's available next
 - **Propagate skips** — if a dependency was skipped, its dependents cannot run
 - **Autonomous stops on failure** — don't skip broken tasks silently

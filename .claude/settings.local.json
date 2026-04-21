@@ -1,0 +1,100 @@
+{
+  "hooks" : {
+    "Notification" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "PostToolUse" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "PreToolUse" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "SessionEnd" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "SessionStart" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "Stop" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "SubagentStop" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ],
+    "UserPromptSubmit" : [
+      {
+        "hooks" : [
+          {
+            "command" : "\"\/Applications\/Replica.app\/Contents\/Resources\/replica-hook.sh\" \"http:\/\/127.0.0.1:49388\/events\" \"\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\"",
+            "type" : "command"
+          }
+        ],
+        "matcher" : ""
+      }
+    ]
+  },
+  "permissions" : {
+    "allow" : [
+      "Bash(chmod +x \/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh)",
+      "Bash(\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh list)",
+      "Bash(\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh install)"
+    ]
+  },
+  "replicaManaged" : true
+}
