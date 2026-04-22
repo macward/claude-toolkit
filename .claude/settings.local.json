@@ -93,7 +93,8 @@
     "allow" : [
       "Bash(chmod +x \/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh)",
       "Bash(\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh list)",
-      "Bash(\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh install)"
+      "Bash(\/Users\/maxward\/Developer\/1_PROJECTS\/VibeWorkspace\/claude-toolkit\/install.sh install)",
+      "Bash(.\/install.sh install *)"
     ]
   },
   "replicaManaged" : true

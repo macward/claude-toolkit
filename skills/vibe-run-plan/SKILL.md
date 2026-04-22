@@ -1,16 +1,16 @@
 ---
 name: run-plan
-description: "Use when the user wants to execute all pending tasks in sequence. Default is autonomous (runs all without pausing). If the user asks to confirm, review, or go step-by-step, pause between tasks for approval. Delegates each task to solve-task."
+description: "Use when the user wants to execute all pending tasks in sequence. Default is autonomous (runs all without pausing). If the user asks to confirm, review, or go step-by-step, pause between tasks for approval. Delegates each task to /vibe-solve-task."
 ---
 
 # Run Plan
 
-Orchestrate the execution of all pending tasks in sequence, delegating each one to `solve-task`.
+Orchestrate the execution of all pending tasks in sequence, delegating each one to `/vibe-solve-task`.
 
 ## Prerequisites
 
 - vibeMCP server with tools: `list_tasks`, `read_doc`, `get_plan`, `tool_create_plan`
-- Skill available: `solve-task`
+- Command available: `/vibe-/vibe-solve-task`
 - Git repository with a remote
 - `gh` CLI authenticated
 
@@ -25,7 +25,7 @@ run-plan handles **orchestration only**:
 - Inter-task cleanup and state verification
 - Progress logging
 
-run-plan does **not** handle task execution. Each task is fully delegated to `solve-task`, which owns the entire lifecycle (preflight, viability, implementation, review, delivery).
+run-plan does **not** handle task execution. Each task is fully delegated to `/vibe-solve-task`, which owns the entire lifecycle (preflight, viability, implementation, review, delivery).
 
 ## Parameters
 
@@ -94,7 +94,7 @@ For confirm mode, read the objective of each queued task:
 read_doc(project, "tasks", <filename>)
 ```
 
-In autonomous mode this step is optional — solve-task will read the task itself.
+In autonomous mode this step is optional — /vibe-solve-task will read the task itself.
 
 ### 5. Announce
 
@@ -130,7 +130,7 @@ Continue? [Y / skip / abort]
 
 #### 6b. Pre-task: Verify clean state
 
-Before delegating to solve-task, verify the working directory is ready:
+Before delegating to /vibe-solve-task, verify the working directory is ready:
 
 ```bash
 git status --porcelain
@@ -150,23 +150,23 @@ git branch -D task/<NNN>-<task-name>
 git push origin --delete task/<NNN>-<task-name> 2>/dev/null
 ```
 
-This ensures solve-task always starts from clean state.
+This ensures /vibe-solve-task always starts from clean state.
 
 #### 6c. Execute task
 
-Delegate to `solve-task`:
+Delegate to `/vibe-solve-task`:
 ```
-Execute solve-task for task <NNN>
+Execute /vibe-solve-task for task <NNN>
 ```
 
-solve-task will run its full process (preflight, dependency check, viability, implementation, review, delivery). run-plan does not interfere with any of those steps.
+/vibe-solve-task will run its full process (preflight, dependency check, viability, implementation, review, delivery). run-plan does not interfere with any of those steps.
 
-**If solve-task completes successfully:**
+**If /vibe-solve-task completes successfully:**
 ```
 [2/N] <NNN>-<task-name> ── done ✓
 ```
 
-**If solve-task fails** → go to step 7 (Handle Failures).
+**If /vibe-solve-task fails** → go to step 7 (Handle Failures).
 
 #### 6d. Post-task: Re-evaluate queue
 
@@ -212,14 +212,14 @@ After each completed (or skipped) task — before starting the next one — clea
 
 5. **Resume** — continue with the next task in the queue (step 6a or 6b depending on mode).
 
-> **Why this matters:** Each `solve-task` invocation adds substantial context (code diffs, PR output, review logs). Without clearing, a run of 5+ tasks risks filling the context window and degrading quality on later tasks. Clearing and reloading from vibeMCP keeps each task delegation starting from a clean, focused state.
+> **Why this matters:** Each `/vibe-solve-task` invocation adds substantial context (code diffs, PR output, review logs). Without clearing, a run of 5+ tasks risks filling the context window and degrading quality on later tasks. Clearing and reloading from vibeMCP keeps each task delegation starting from a clean, focused state.
 
 ### 7. Handle Failures
 
 **Autonomous mode**: stop the entire run immediately.
 ```
 [3/N] <NNN>-<task-name> ── FAILED ✗
-Reason: <what solve-task reported>
+Reason: <what /vibe-solve-task reported>
 
 run-plan stopped. Completed N/M tasks.
 ```
@@ -227,7 +227,7 @@ run-plan stopped. Completed N/M tasks.
 **Confirm mode**: give the user options:
 ```
 [3/N] <NNN>-<task-name> ── FAILED ✗
-Reason: <what solve-task reported>
+Reason: <what /vibe-solve-task reported>
 
 Options:
 - retry — clean up and re-run this task from scratch
@@ -235,7 +235,7 @@ Options:
 - abort — stop the entire run
 ```
 
-**On retry**: step 6b will clean up the failed branch before re-delegating to solve-task.
+**On retry**: step 6b will clean up the failed branch before re-delegating to /vibe-solve-task.
 
 **On skip**: record as skipped, check skip propagation (6e), continue.
 
@@ -271,14 +271,14 @@ tool_create_plan(
 | `gh` not authenticated | Prompt `gh auth login`, stop |
 | No pending tasks | Inform user, stop |
 | All tasks blocked | Show blockers, stop |
-| solve-task fails (autonomous) | Stop entire run, log, inform |
-| solve-task fails (confirm) | Offer retry/skip/abort |
-| solve-task stops for viability | Treated as failure — same handling |
+| /vibe-solve-task fails (autonomous) | Stop entire run, log, inform |
+| /vibe-solve-task fails (confirm) | Offer retry/skip/abort |
+| /vibe-solve-task stops for viability | Treated as failure — same handling |
 | Skipped task blocks downstream | Auto-skip downstream, inform |
 
 ## Key Principles
 
-- **Delegate to solve-task** — run-plan never implements, reviews, or delivers. It orchestrates.
+- **Delegate to /vibe-solve-task** — run-plan never implements, reviews, or delivers. It orchestrates.
 - **Clean state between tasks** — verify and enforce clean git state before each task, clean up failed branches on retry
 - **Clear context between tasks** — issue `/clear` after each task and reload from vibeMCP to prevent context bloat across long runs
 - **Re-check dependencies** — completing or skipping a task changes what's available next

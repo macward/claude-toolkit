@@ -1,174 +1,152 @@
 ---
 name: spec
-description: "Use when the user wants to create a Software Design Document (SDD) for a feature or component. Reads design docs from plans/ and analyzes the codebase to produce a structured spec in specs/. Typically follows brainstorming and leads into sdd-evolve or task-breakdown. Requires vibeMCP tools."
+description: "Use when the user wants to create a Software Design Document (SDD) for a feature or component. Reads a requirements document from plans/ (produced by /vibe-requirements) and analyzes the codebase to produce a technical spec in specs/. Typically follows /vibe-requirements or /clarify, and leads into /vibe-task-breakdown. Requires vibeMCP tools."
 ---
 
 # Spec
 
-Create a Software Design Document (SDD) from a feature description, design doc, or user request.
+Create a technical Software Design Document (SDD) from a requirements document or feature description. Defines the *cómo* — arquitectura, interfaces, estructura — anclado al codebase real.
 
 ## Flow
 
 ```
-brainstorming (plans/) → [spec] (specs/) → sdd-evolve (specs/ v2)
-                                          → task-breakdown (tasks/)
+/vibe-requirements (plans/) → [spec] (specs/) → /vibe-task-breakdown (tasks/)
 ```
 
-- If coming from `brainstorming`, a design doc should already exist in `plans/`. Read it first — it's your primary input.
-- After creating the SDD, suggest `sdd-evolve` to iterate on the design or `task-breakdown` to start implementation.
+- El input principal es un `requirements-*.md` en `plans/` (producido por `/vibe-requirements`). Léelo primero.
+- Si no existe requirements, aceptar una descripción directa del usuario como fallback.
+- Después del spec, sugerir `/analyze` para validar coherencia o `/vibe-task-breakdown` para implementar.
 
 ## Prerequisites
 
-- vibeMCP server with tools: `list_specs`, `list_plans`, `read_doc`, `tool_create_spec`
+- vibeMCP server con tools: `list_specs`, `list_plans`, `read_doc`, `tool_create_spec`
 
-If vibeMCP is not connected, inform the user and stop.
+Si vibeMCP no está conectado, informar al usuario y parar.
 
 ## Setup
 
-1. Find the workspace: look for `vibe: <project>` in CLAUDE.md
-2. If no project found, ask the user
+1. Leer `vibe: <project>` del CLAUDE.md del proyecto activo
+2. Si no hay project, preguntar
 
 ## Process
 
-### 1. Check Existing Specs
+### 1. Check existing specs
 
 ```
 list_specs(project)
 ```
 
-If a spec for the same topic already exists, inform the user:
-```
-An SDD already exists: sdd-auth-service.md
-Options:
-- Read it and extend it with new scope
-- Use sdd-evolve to iterate on it
-- Create a new one with a different name
-```
+Si ya existe un spec para el mismo tema, informar al usuario y ofrecer opciones (extender, renombrar, reemplazar). No duplicar.
 
-### 2. Gather Input
+### 2. Leer requirements
 
-**If coming from brainstorming:**
 ```
 list_plans(project)
-read_doc(project, "plans", <design-doc>)
+read_doc(project, "plans", <requirements-file>)
 ```
-Extract the goal, scope, and decisions from the design doc. Do not re-ask the user for information already in the doc.
 
-**If standalone request:**
-Ask the user to describe what they want to build. One clarifying question max — prefer multiple choice.
+Si hay múltiples requirements, preguntar cuál. Si no hay ninguno, preguntar al usuario qué quiere construir (una sola pregunta, no más).
 
-### 3. Analyze the Codebase
+Extraer del requirements:
+- Requisitos DEBE/DEBERÍA/MAY
+- Escenarios BDD (funcionan como criterios de aceptación para el spec)
 
-Read relevant files in the project to understand:
-- Current architecture and patterns in use
-- Existing interfaces the new feature will interact with
-- Naming conventions and module organization
-- Tech stack constraints
+**No re-preguntar** lo que ya está en el requirements.
 
-This step is critical — the SDD must be grounded in the actual codebase, not abstract.
+### 3. Analizar el codebase
+
+Leer los archivos relevantes para entender:
+- Arquitectura actual y patrones en uso
+- Interfaces existentes con las que la feature interactuará
+- Convenciones de naming y organización
+- Constraints del stack
+
+**Este paso es crítico**: el SDD debe estar anclado al codebase real, no ser abstracto.
 
 ### 4. Draft the SDD
 
-Generate the document following the structure below. **Adapt sections to scope** — a small change doesn't need all 10 sections. Skip sections that don't apply and note why.
+Generar el documento con esta estructura. **Adaptar al scope**: omitir secciones que no apliquen (y mencionarlo explícitamente).
 
 ```markdown
-# SDD: <Title>
+# SDD: <Título>
 
-## 1. Metadata
-- Author: AI-assisted
+## Metadata
 - Date: YYYY-MM-DD
 - Status: draft
-- Source: plans/<design-doc>.md (if applicable)
+- Source: plans/<requirements-file>.md
 
-## 2. Overview
-<What is being built and why — 2-3 paragraphs. State the problem,
-the proposed solution, and the expected outcome.>
+## Overview
+<Qué se construye y por qué. 1-2 párrafos. Referenciar el requirements como fuente del *qué*.>
 
-## 3. Proposed Architecture
-<Components, responsibilities, and interactions. Include a text
-diagram if it helps. Reference existing modules that will be
-touched or extended.>
+## Architecture
+<Componentes, responsabilidades e interacciones. Referenciar módulos existentes
+que se tocan o extienden. Incluir diagrama de texto si ayuda.>
 
-## 4. Data Model
-<Entities, relationships, schemas. Show struct/class definitions
-or table schemas as code blocks. Skip if no new data structures.>
+## Interfaces
+<Contratos públicos: endpoints, signatures, protocolos. Ejemplos de request/response.
+Omitir si es refactor puramente interno.>
 
-## 5. API / Interfaces
-<Public interfaces: endpoints, function signatures, protocols,
-contracts. Include request/response examples. Skip if purely
-internal refactoring.>
+## Implementation Plan
+<Pasos ordenados. Cada paso debe ser independientemente testeable.
+Incluir criterio de verificación por paso.>
 
-## 6. Directory Structure
-<Where the new code lives. Show only new or modified paths,
-not the entire project tree.>
-
-## 7. Implementation Plan
-<Ordered steps. Each step should be independently deployable
-or at least testable. Include verification criteria per step.>
-
-## 8. Dependencies
-<External packages, internal modules, or services required.
-Note version constraints if relevant.>
-
-## 9. Risks
-
-| Risk | Impact | Likelihood | Mitigation |
-|------|--------|------------|------------|
-| ... | High/Med/Low | High/Med/Low | ... |
-
-## 10. Success Criteria
-<How to verify the feature is complete and working.
-Concrete, testable statements.>
+## Risks
+<Solo riesgos concretos que afecten el diseño. Omitir si no hay.>
 ```
 
-### 5. Present Summary
+**Secciones opcionales** (agregar solo si el scope lo justifica):
+- **Data Model** — cuando se introducen entidades o tablas nuevas
+- **Directory Structure** — cuando la organización de archivos no es obvia
+- **Dependencies** — cuando se agregan librerías o servicios externos
 
-Before writing, show the user a brief summary:
+### 5. Presentar resumen
+
+Antes de escribir:
 ```
-SDD: <Title>
-Sections: <list of included sections>
-Scope: <one-line description>
-Filename: sdd-<slug>.md
+SDD: <Título>
+Secciones incluidas: <lista>
+Secciones omitidas: <lista + razón>
+Archivo: sdd-<slug>.md
 
-Write to specs/?
-```
-
-Wait for confirmation.
-
-### 6. Write the SDD
-
-```
-tool_create_spec(project, title=<title>, content=<full SDD content>)
+¿Escribo en specs/?
 ```
 
-The tool auto-generates the filename as `sdd-<slug>.md` and writes to `specs/`.
+Esperar confirmación.
 
-### 7. Suggest Next Steps
+### 6. Guardar
 
 ```
-Created: specs/sdd-<slug>.md
+tool_create_spec(project, title=<título>, content=<contenido>)
+```
 
-Next:
-- sdd-evolve — to review and iterate on the design
-- task-breakdown — to turn this spec into implementation tasks
+El tool auto-genera el filename como `sdd-<slug>.md`.
+
+### 7. Sugerir siguiente paso
+
+```
+Creado: specs/sdd-<slug>.md
+
+Siguiente:
+- /clarify — si hay ambigüedades que resolver antes de implementar
+- /analyze — para validar coherencia con plan y tasks existentes
+- /vibe-task-breakdown — para convertir esto en tasks accionables
 ```
 
 ## Error Handling
 
-| Error | Action |
+| Error | Acción |
 |-------|--------|
-| vibeMCP not connected | Inform user, stop |
-| Duplicate spec exists | Show options (extend, evolve, new name) |
-| No design doc and no description | Ask user what to build |
-| Codebase read fails | Note which files couldn't be read, continue with available info |
-| tool_create_spec fails | Show error, offer to retry or save content locally |
+| vibeMCP no conectado | Informar al usuario y parar |
+| Spec duplicado | Mostrar opciones (extender, renombrar, reemplazar) |
+| No hay requirements ni descripción | Preguntar al usuario qué construir (una vez) |
+| Lectura del codebase falla | Anotar qué archivos no se pudieron leer, continuar con lo disponible |
+| tool_create_spec falla | Mostrar error, ofrecer reintentar |
 
 ## Key Principles
 
-- **Codebase-grounded** — always read relevant code before writing. An SDD that ignores the actual codebase is fiction.
-- **Adaptive structure** — not every SDD needs 10 sections. A 20-line change doesn't need a Data Model section. Skip what doesn't apply.
-- **Spec, not brainstorm** — brainstorming is exploratory and creative. This skill produces a formal technical document with concrete decisions.
-- **Draft status** — every SDD starts as draft. Use `sdd-evolve` to iterate and promote.
-- **Always use MCP tools** — never write spec files directly with Write/Edit
-- **Don't duplicate input** — if a design doc exists, extract from it. Don't re-ask the user for things already decided.
-- **Connect the flow** — reference where the input came from and where the user can go next
+- **El requirements define el *qué*, este skill define el *cómo*** — no redefinir requisitos acá
+- **Codebase-grounded** — leer código relevante antes de escribir. Un SDD que ignora el codebase real es ficción
+- **Adaptive structure** — un cambio de 20 líneas no necesita una sección Data Model. Omitir lo que no aplique y decirlo
+- **Draft status** — todo SDD arranca como draft
+- **Siempre usar MCP tools** — nunca escribir specs con Write/Edit directamente
+- **No duplicar input** — si el requirements ya lo dice, no re-preguntar

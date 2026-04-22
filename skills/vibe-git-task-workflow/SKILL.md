@@ -45,8 +45,7 @@ git commit -m "<title>
 
 <description>
 
-Task: <name>
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Task: <name>"
 ```
 
 ### 4. Push & Create PR

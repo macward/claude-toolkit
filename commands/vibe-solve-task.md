@@ -1,17 +1,12 @@
----
-name: solve-task
-description: "Use when the user wants to work on and complete a specific task. Orchestrates the full lifecycle: viability analysis, implementation, code review, and delivery. Requires vibeMCP tools. Handles git operations inline (following git-task-workflow patterns). Uses code-review for review."
----
-
-# Solve Task
+# Vibe Solve Task
 
 Execute a task end-to-end: analyze, implement, review, and deliver.
 
+Usage: `/vibe-solve-task [NNN]` — task number is optional.
+
 ## Prerequisites
 
-- vibeMCP server with tools: `list_tasks`, `read_doc`, `tool_update_task_status`, `tool_update_task`, `tool_create_doc`, `get_plan`
-- Skill available: `code-review` (for code review via subagent)
-- Git repository with a remote
+- vibeMCP connected
 - `gh` CLI authenticated
 
 If vibeMCP is not connected, inform the user and stop.
@@ -34,18 +29,18 @@ If there are uncommitted changes → inform the user and stop. Do not stash or d
 
 ### 2. Select Task
 
-**If task number provided** (e.g., "solve-task 003"):
+**If task number provided** (e.g., `/vibe-solve-task 003`):
 ```
-list_tasks(project)
+mcp__vibeMCP__list_tasks(project=<project>)
 ```
 Find the task whose filename starts with `003-`. Then:
 ```
-read_doc(project, "tasks", <matched_filename>)
+mcp__vibeMCP__read_doc(project=<project>, folder="tasks", filename=<matched_filename>)
 ```
 
 **If no number provided:**
 ```
-list_tasks(project, status="in-progress")
+mcp__vibeMCP__list_tasks(project=<project>, status="in-progress")
 ```
 - If found → use first in-progress task
 - If none → `list_tasks(project, status="pending")` → use first pending
@@ -54,7 +49,7 @@ list_tasks(project, status="in-progress")
 ### 3. Check Dependencies
 
 ```
-get_plan(project)
+mcp__vibeMCP__get_plan(project=<project>)
 ```
 
 If an execution plan exists, check whether this task has `blockedBy` dependencies that are not yet `done`.
@@ -64,13 +59,13 @@ If blocked → list what's blocking and stop:
 Task 003 is blocked by:
 - 001-setup-db (status: pending)
 
-Complete the blocking tasks first, or use run-plan to execute in order.
+Complete the blocking tasks first, or use /vibe-run-plan to execute in order.
 ```
 
 ### 4. Read & Understand
 
 ```
-read_doc(project, "tasks", <task_file>)
+mcp__vibeMCP__read_doc(project=<project>, folder="tasks", filename=<task_file>)
 ```
 
 Parse and retain:
@@ -96,23 +91,30 @@ Before writing any code:
 - **Viable** → continue
 - **Viable with adjustments** → update the task and inform:
   ```
-  tool_update_task(project, <task_file>, steps=[<adjusted_steps>])
+  mcp__vibeMCP__tool_update_task(project=<project>, task_file=<task_file>, steps=[<adjusted_steps>])
   ```
   Tell the user what changed and why.
 - **Not viable** → explain why and stop. Do not mark as blocked automatically — let the user decide.
 
-### 6. Mark In-Progress
-
-```
-tool_update_task_status(project, <task_file>, "in-progress")
-```
-
-### 7. Create Branch
+### 6. Create Branch
 
 ```bash
 git checkout <base_branch>
 git pull
-git checkout -b task/<NNN>-<task-name>
+```
+
+Check if the branch already exists:
+```bash
+git branch --list task/<NNN>-<task-name>
+```
+
+- If it exists → `git checkout task/<NNN>-<task-name>` (resuming work)
+- If not → `git checkout -b task/<NNN>-<task-name>`
+
+### 7. Mark In-Progress
+
+```
+mcp__vibeMCP__tool_update_task_status(project=<project>, task_file=<task_file>, new_status="in-progress")
 ```
 
 ### 8. Implement
@@ -124,28 +126,17 @@ Follow the steps from the task file:
 
 ### 9. Run Tests
 
-Detect and run the project's test suite:
+Run the test suite using the command defined in the project's `CLAUDE.md` (Build & Run Commands section).
 
-| Indicator | Command |
-|---|---|
-| `Package.swift` | `swift test` |
-| `pyproject.toml` with pytest | `uv run pytest` or `pytest` |
-| `package.json` with `"test"` script | `npm test` |
-| `Makefile` with `test` target | `make test` |
-
-If no test suite is detected, skip this step.
+If no test command is defined, skip this step.
 
 **If tests fail** → fix and rerun. This counts as **attempt 1**.
 
 ### 10. Code Review (mandatory)
 
-Use the `code-review` skill with:
+Use the `vibe-core-review` skill with:
 - **base_branch**: from setup
 - **task_objective**: the objective parsed in step 4
-
-```bash
-git diff <base_branch>..HEAD
-```
 
 **If PASS** → go to step 12.
 **If ISSUES** → go to step 11.
@@ -169,14 +160,13 @@ After a successful cycle → go to step 12.
 ### 12. Deliver
 
 ```bash
-git add -A
+git add $(git diff --name-only HEAD)
 git commit -m "$(cat <<'EOF'
 <task title>
 
 <summary of changes>
 
 Task: <NNN>-<task-name>
-Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 
@@ -194,6 +184,8 @@ gh pr create \
 EOF
 )"
 
+gh pr checks --watch
+
 gh pr merge --squash --delete-branch
 
 git checkout <base_branch>
@@ -208,14 +200,14 @@ Capture the PR URL from `gh pr create` output for use in step 13.
 ### 13. Log & Complete
 
 ```
-tool_create_doc(
+mcp__vibeMCP__tool_create_doc(
     project=<project>,
     folder="changelog",
     filename="<NNN>-<task-name>",
     content="# <task title>\n\nDate: <YYYY-MM-DD>\nPR: <pr_url>\n\n## Changes\n- <what changed>\n\n## Files Affected\n- <key files>"
 )
 
-tool_update_task_status(project, <task_file>, "done")
+mcp__vibeMCP__tool_update_task_status(project=<project>, task_file=<task_file>, new_status="done")
 ```
 
 If the project has a root `CHANGELOG.md`, also append the entry there following Keep a Changelog format.
@@ -236,8 +228,6 @@ If the project has a root `CHANGELOG.md`, also append the entry there following 
 
 ## Key Principles
 
-- **Git operations are inline** — this skill executes git commands directly, following the patterns from git-task-workflow. It does not invoke git-task-workflow as a separate skill.
-- **Delegate review to code-review** — don't inline review logic, always use the skill with `task_objective`
 - **Always use MCP tools for task state** — never edit task files directly with Read/Write
 - **3 attempts max** — each fix→test→review cycle is one attempt. Surface the problem, don't loop forever
 - **Log everything** — changelog for every completed task, failure details for every failed task
