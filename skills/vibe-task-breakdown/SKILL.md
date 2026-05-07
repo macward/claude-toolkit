@@ -19,9 +19,8 @@ brainstorming → [task-breakdown] → solve-task / run-plan
 ## Prerequisites
 
 This skill requires a vibeMCP server with these tools available:
-- `list_tasks` — check existing tasks
 - `get_plan` — read execution plan
-- `create_task` — create task files
+- `create_task` — create task files (the server validates duplicates by title)
 - `create_doc` / `update_doc` — create or update documents
 
 If the MCP server is not connected, inform the user and stop.
@@ -30,8 +29,7 @@ If the MCP server is not connected, inform the user and stop.
 
 1. **Find the workspace**: Look for `vibe: <n>` in the project's CLAUDE.md or ask the user
 2. **Check for a design doc**: If `brainstorming` was used, read the design from `plans/` — it defines what to build
-3. **Check existing state**: Call `list_tasks(project)` to see current tasks and avoid duplicates
-4. **Check existing plan**: Call `get_plan(project)` — if a plan exists, you're extending it, not replacing it
+3. **Check existing plan**: Call `get_plan(project)` — if a plan exists, you're extending it, not replacing it. The execution plan already enumerates current tasks; do not call `list_tasks` here. `tool_create_task` rejects duplicate titles server-side.
 
 ## Process
 

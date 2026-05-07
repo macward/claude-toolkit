@@ -10,14 +10,15 @@ Provides a comprehensive overview of the project's current state: tasks by statu
 
 ## Process
 
-### 1. Get All Tasks
+### 1. Get Active Tasks
 
 ```
-mcp__vibeMCP__list_tasks(project=<project>)
+mcp__vibeMCP__list_tasks(project=<project>, status=["pending", "in-progress", "blocked"])
 ```
 
-- Retrieve all tasks regardless of status
-- Group by status: done, in-progress, pending, blocked
+- Only retrieve active tasks — `done` is excluded by default to keep responses small
+- If the report needs the done count, request it explicitly with a second call: `list_tasks(project, status="done")`
+- Group by status: in-progress, pending, blocked
 
 ### 2. Get Execution Plan
 

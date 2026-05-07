@@ -19,7 +19,7 @@ Leer `vibe: <project>` del CLAUDE.md del proyecto activo.
 ```
 mcp__vibeMCP__list_specs(project=<project>)
 mcp__vibeMCP__list_plans(project=<project>)
-mcp__vibeMCP__list_tasks(project=<project>)
+mcp__vibeMCP__list_tasks(project=<project>, status=["pending", "in-progress", "blocked", "done"])
 mcp__vibeMCP__read_constitution(project=<project>)
 ```
 
