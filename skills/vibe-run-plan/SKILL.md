@@ -63,15 +63,13 @@ If `gh` is not authenticated → prompt `gh auth login` and stop.
 **If feature specified:**
 ```
 get_plan(project, filename="feature-<feature>.md")
-list_tasks(project, status="pending", feature=<feature>)
-list_tasks(project, status="in-progress", feature=<feature>)
+list_tasks(project, status=["pending", "in-progress"], feature=<feature>)
 ```
 
 **Otherwise (master plan):**
 ```
 get_plan(project)
-list_tasks(project, status="pending")
-list_tasks(project, status="in-progress")
+list_tasks(project, status=["pending", "in-progress"])
 ```
 
 If no pending or in-progress tasks → inform user and stop.
@@ -204,8 +202,7 @@ After each completed (or skipped) task — before starting the next one — clea
 3. **Reload context from vibeMCP** — re-establish working state after the clear:
    ```
    get_plan(project, [filename])
-   list_tasks(project, status="pending", [feature])
-   list_tasks(project, status="in-progress", [feature])
+   list_tasks(project, status=["pending", "in-progress"], [feature])
    ```
 
 4. **Rebuild remaining queue** — reconstruct from current task statuses in vibeMCP. Already-done tasks will appear as `done`, so the queue rebuilds correctly from live state without needing to remember what was completed.

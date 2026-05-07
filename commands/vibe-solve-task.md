@@ -31,19 +31,19 @@ If there are uncommitted changes → inform the user and stop. Do not stash or d
 
 **If task number provided** (e.g., `/vibe-solve-task 003`):
 ```
-mcp__vibeMCP__list_tasks(project=<project>)
+mcp__vibeMCP__list_tasks(project=<project>, status=["pending", "in-progress", "blocked", "done"])
 ```
-Find the task whose filename starts with `003-`. Then:
+The full status list is required because the user may resolve a task in any state (e.g. resuming a `blocked` one, re-opening a `done` one). Find the task whose filename starts with `003-`. Then:
 ```
 mcp__vibeMCP__read_doc(project=<project>, folder="tasks", filename=<matched_filename>)
 ```
 
 **If no number provided:**
 ```
-mcp__vibeMCP__list_tasks(project=<project>, status="in-progress")
+mcp__vibeMCP__list_tasks(project=<project>, status="in-progress", limit=1)
 ```
-- If found → use first in-progress task
-- If none → `list_tasks(project, status="pending")` → use first pending
+- If found → use that task
+- If none → `list_tasks(project, status="pending", limit=1)` → use that
 - If nothing → inform user, no tasks available, stop
 
 ### 3. Check Dependencies
