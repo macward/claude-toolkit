@@ -66,7 +66,7 @@ Entonces <resultado esperado>
 
 Mostrar el documento al usuario y preguntar:
 ```
-¿Lo guardo en plans/ como requirements-<slug>.md?
+¿Lo guardo en requirements/ como requirements-<slug>.md?
 ```
 
 Esperar confirmación antes de guardar.
@@ -74,18 +74,18 @@ Esperar confirmación antes de guardar.
 ### 4. Guardar
 
 ```
-mcp__vibeMCP__tool_create_plan(
+mcp__vibeMCP__tool_create_doc(
   project=<project>,
-  title=<título>,
-  content=<contenido>,
-  filename=requirements-<slug>.md
+  folder="requirements",
+  filename=requirements-<slug>.md,
+  content=<contenido>
 )
 ```
 
 ### 5. Sugerir siguiente paso
 
 ```
-Guardado: plans/requirements-<slug>.md
+Guardado: requirements/requirements-<slug>.md
 
 Siguiente: `/vibe-spec` leerá este documento para diseñar la solución técnica.
 ```

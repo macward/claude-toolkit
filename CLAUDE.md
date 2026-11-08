@@ -3,7 +3,7 @@
 ## Vibe Workspaces
 
 Cuando un proyecto tenga `vibe: <nombre>` en su CLAUDE.md, 
-revisa siempre `~/.vibe/<nombre>/` para:
+accede al contexto del proyecto vía vibeMCP tools. El workspace contiene:
 - tasks/ - tareas pendientes y en progreso
 - plans/ - diseños, decisiones y execution-plan.md
 - reports/ - documentación generada
